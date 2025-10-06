@@ -30,7 +30,7 @@ Interestingly enough, Kauno Akropolis is not part of the Akropolis franchise, so
 
 ## Weekly Data Updates
 
-### Option 1: Manual Update (Recommended)
+### Manual Update 
 Fill in the correct dates (ANALYSIS_START_DATE and ANALYSIS_END_DATE) in the config.py file, which should be a 14-day period. 
 (For me it's always a bit counter-intuivite, but so 1/10 - 15/10 is not a 14 day period, it's actually 15 days, so it should be 1/10 - 14/10, just to be sure.)
 
@@ -51,7 +51,11 @@ It will run from Bright Data, so you'll see 20-second updates to see if the scra
 
 You can go to Bright Data > Web Scrapers > Web Scrapers Library > facebook.com > "Facebook - Pages Posts by Profiles URL - collect by URL" > press "Next" (for some reason it does not get added to your Web Scraper menu so you have to do this every time) > Go to the "Logs" tab > You should see the Snapshot running, and you can see what the Status is. 
 
-If the scraping failed but the Status is Ready, you can run the pipelin.py file again, but this time in your command line with the command python pipelin.py snapshot s_mget3mpl1lt2lqmhxu (you can find your snapshot on Bright Data or in the output of the code: Snapshot s_mget3mpl1lt2lqmhxu status: running (checked at 7 min 0 sec)")
+If the scraping failed but the Status is Ready, you can run the pipelin.py file again, but this time in your command line with the command 
+```bash
+python pipelin.py snapshot s_mget3mpl1lt2lqmhxu 
+```
+(you can find your snapshot on Bright Data or in the output of the code: Snapshot s_mget3mpl1lt2lqmhxu status: running (checked at 7 min 0 sec)")
 
 If the Snapshot is not Ready, or can't be downloaded for some reason, give it a few hours and try again... Bright Data can be very annoying.
 
@@ -70,6 +74,8 @@ You need these in a `.env` file in the project folder:
 BRIGHTDATA_API_TOKEN=your_token_here
 OPENAI_API_KEY=your_key_here
 ```
+
+## After the Updates
 
 After running all the analyses, it's good to check the facebook_master_file to see if everything is okay. The format of the file might be looking a bit weird, as the way of scraping and analysis has changed throughout the development, so not all columns are filled in, but this is okay.
 
