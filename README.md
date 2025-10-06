@@ -53,7 +53,7 @@ You can go to Bright Data > Web Scrapers > Web Scrapers Library > facebook.com >
 
 If the scraping failed but the Status is Ready, you can run the pipelin.py file again, but this time in your command line with the command 
 ```bash
-python pipelin.py snapshot s_mget3mpl1lt2lqmhxu 
+python pipeline.py snapshot s_mget3mpl1lt2lqmhxu 
 ```
 (you can find your snapshot on Bright Data or in the output of the code: Snapshot s_mget3mpl1lt2lqmhxu status: running (checked at 7 min 0 sec)")
 
