@@ -4,8 +4,8 @@ from datetime import datetime
 
 # === DATE CONFIGURATION ===
 # Define the analysis period for the dashboard and summaries
-ANALYSIS_START_DATE = datetime(2025, 9, 17).date()  # September 5, 2025
-ANALYSIS_END_DATE = datetime(2025, 9, 30).date()   # September 18, 2025
+ANALYSIS_START_DATE = datetime(2025, 9, 30).date()  # September 5, 2025
+ANALYSIS_END_DATE = datetime(2025, 10, 6).date()   # September 18, 2025
 
 # === DEPLOYMENT CONFIGURATION ===
 # Set to True when deploying to Streamlit Cloud, False for local development
