@@ -136,14 +136,7 @@ PERFORMANCE METRICS:
 - This week (most recent 7 days): {stats['current_posts']} posts, {stats['current_engagement']:,.0f} total engagement ({stats['current_likes']:,.0f} likes, {stats['current_comments']:,.0f} comments, {stats['current_shares']:,.0f} shares)
 - Previous week (7 days before): {stats['previous_posts']} posts, {stats['previous_engagement']:,.0f} total engagement ({stats['previous_likes']:,.0f} likes, {stats['previous_comments']:,.0f} comments, {stats['previous_shares']:,.0f} shares)
 - Posts change: {stats['posts_change']:+.1f}%
-- Engagement change: {stats['engagement_change']:+.1f}%
-- Likes change: {stats['likes_change']:+.1f}%
-- Comments change: {stats['comments_change']:+.1f}%
-- Shares change: {stats['shares_change']:+.1f}%
-
-PLATFORM BREAKDOWN:
-- This week platforms: {stats['current_platforms']}
-- Previous week platforms: {stats['previous_platforms']}
+- Total Engagement (sum of likes, comments, and shares) change: {stats['engagement_change']:+.1f}%
 
 THIS WEEK POST CONTENT (first 15 posts):
 {chr(10).join(stats['current_content'][:15])}
@@ -158,7 +151,7 @@ PREVIOUS WEEK CLUSTERS:
 {', '.join(stats['previous_clusters'])}
 
 Please provide a concise 2-3 paragraph summary covering:
-1. Performance metrics (posts and engagement changes)
+1. Performance metrics (posts and engagement changes) without talking about comments or shares.
 2. Content focus areas and changes
 3. Specific examples of posts posted this week vs the previous week
 

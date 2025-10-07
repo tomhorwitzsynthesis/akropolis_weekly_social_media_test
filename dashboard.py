@@ -644,63 +644,103 @@ else:
             for idx, row in top3_brand.iterrows():
                 st.markdown(create_post_card(row["brand"], row["engagement"], row["content"], row["post_id"], row["platform"], row["source_url"]), unsafe_allow_html=True)
 
-# ---- 3) Top 3 clusters by engagement ----
-st.markdown("#### Top 3 Clusters by Engagement")
+# ---- 3) Top 3 clusters comparison ----
+st.markdown("#### Top 3 Clusters: This Week vs Previous Week")
 
-# Filter for posts with cluster_1 data
-df_with_clusters = df_f[df_f["cluster_1"].notna() & (df_f["cluster_1"] != "")]
+# Current week clusters
+df_current_clusters = df_current[df_current["brand"].isin(brands_in_view)]
+df_current_clusters = df_current_clusters[df_current_clusters["cluster_1"].notna() & (df_current_clusters["cluster_1"] != "")]
 
-if df_with_clusters.empty:
-    st.info("No cluster data available.")
+# Previous week clusters
+df_prev_clusters = df_previous[df_previous["brand"].isin(brands_in_view)]
+df_prev_clusters = df_prev_clusters[df_prev_clusters["cluster_1"].notna() & (df_prev_clusters["cluster_1"] != "")]
+
+if df_current_clusters.empty and df_prev_clusters.empty:
+    st.info("No cluster data available for comparison.")
 else:
-    # Group by cluster and brand for brand-specific tabs
-    cluster_rollup = (
-        df_with_clusters.groupby(["cluster_1", "brand"], as_index=False)
-        .agg(
-            posts_count=("post_id", "nunique"),
-            total_engagement=("total_engagement", "sum")
+    # Create comparison tabs
+    comparison_brands = sorted(set(df_current_clusters["brand"].unique()) | set(df_prev_clusters["brand"].unique()))
+    comparison_tabs = st.tabs(["Overall"] + comparison_brands)
+    
+    def get_top_clusters_with_examples(df, brand_filter=None):
+        if brand_filter:
+            df_filtered = df[df["brand"] == brand_filter]
+        else:
+            df_filtered = df
+        
+        cluster_stats = (
+            df_filtered.groupby("cluster_1", as_index=False)
+            .agg(
+                posts_count=("post_id", "nunique"),
+                total_engagement=("total_engagement", "sum")
+            )
+            .sort_values("total_engagement", ascending=False)
+            .head(3)
         )
-    )
-    
-    # Group by cluster only for overall tab to avoid duplicate clusters
-    cluster_rollup_overall = (
-        df_with_clusters.groupby("cluster_1", as_index=False)
-        .agg(
-            posts_count=("post_id", "nunique"),
-            total_engagement=("total_engagement", "sum")
-        )
-    )
-    
-    brands_with_clusters = sorted(cluster_rollup["brand"].unique())
-    cluster_tabs = st.tabs(["Overall"] + brands_with_clusters)
-    
-    def top3_clusters(d):
-        return d.sort_values("total_engagement", ascending=False).head(3).reset_index(drop=True)
-    
-    with cluster_tabs[0]:
-        top3_clusters_overall = top3_clusters(cluster_rollup_overall)
-        for idx, row in top3_clusters_overall.iterrows():
-            # Get examples for this cluster (using post_summary and source_url)
+        
+        # Add examples for each cluster
+        cluster_examples = []
+        for _, row in cluster_stats.iterrows():
+            cluster_name = row["cluster_1"]
+            # Get up to 2 examples from post_summary for this cluster
             examples = (
-                df_with_clusters[df_with_clusters["cluster_1"] == row["cluster_1"]]
+                df_filtered[df_filtered["cluster_1"] == cluster_name]
                 [["post_summary", "source_url"]]
                 .dropna(subset=["post_summary"])
                 .head(2)
             )
-            st.markdown(create_cluster_card_with_examples(row["cluster_1"], row["posts_count"], row["total_engagement"], examples), unsafe_allow_html=True)
+            cluster_examples.append(examples)
+        
+        cluster_stats["examples"] = cluster_examples
+        
+        if not cluster_stats.empty:
+            total_posts = df_filtered["post_id"].nunique()
+            cluster_stats["percentage"] = (cluster_stats["posts_count"] / total_posts * 100).round(1)
+        
+        return cluster_stats
     
-    for i, b in enumerate(brands_with_clusters, start=1):
-        with cluster_tabs[i]:
-            top3_clusters_brand = top3_clusters(cluster_rollup[cluster_rollup["brand"] == b])
-            for idx, row in top3_clusters_brand.iterrows():
-                # Get examples for this cluster and brand (using post_summary and source_url)
-                examples = (
-                    df_with_clusters[(df_with_clusters["cluster_1"] == row["cluster_1"]) & (df_with_clusters["brand"] == b)]
-                    [["post_summary", "source_url"]]
-                    .dropna(subset=["post_summary"])
-                    .head(2)
-                )
-                st.markdown(create_cluster_card_with_examples(row["cluster_1"], row["posts_count"], row["total_engagement"], examples), unsafe_allow_html=True)
+    with comparison_tabs[0]:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**This Week**")
+            current_overall = get_top_clusters_with_examples(df_current_clusters)
+            if not current_overall.empty:
+                for idx, row in current_overall.iterrows():
+                    st.markdown(create_cluster_card_with_examples(row["cluster_1"], row["posts_count"], row["total_engagement"], row["examples"]), unsafe_allow_html=True)
+            else:
+                st.info("No data for this week")
+        
+        with col2:
+            st.markdown("**Previous Week**")
+            prev_overall = get_top_clusters_with_examples(df_prev_clusters)
+            if not prev_overall.empty:
+                for idx, row in prev_overall.iterrows():
+                    st.markdown(create_cluster_card_with_examples(row["cluster_1"], row["posts_count"], row["total_engagement"], row["examples"]), unsafe_allow_html=True)
+            else:
+                st.info("No data for previous week")
+    
+    for i, b in enumerate(comparison_brands, start=1):
+        with comparison_tabs[i]:
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown(f"**{b} - This Week**")
+                current_brand = get_top_clusters_with_examples(df_current_clusters, b)
+                if not current_brand.empty:
+                    for idx, row in current_brand.iterrows():
+                        st.markdown(create_cluster_card_with_examples(row["cluster_1"], row["posts_count"], row["total_engagement"], row["examples"]), unsafe_allow_html=True)
+                else:
+                    st.info("No data for this week")
+            
+            with col2:
+                st.markdown(f"**{b} - Previous Week**")
+                prev_brand = get_top_clusters_with_examples(df_prev_clusters, b)
+                if not prev_brand.empty:
+                    for idx, row in prev_brand.iterrows():
+                        st.markdown(create_cluster_card_with_examples(row["cluster_1"], row["posts_count"], row["total_engagement"], row["examples"]), unsafe_allow_html=True)
+                else:
+                    st.info("No data for previous week")
 
 # ---- Optional totals by brand ----
 with st.expander("Totals by brand"):
